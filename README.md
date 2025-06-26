@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/keyvalues3.svg)](https://crates.io/crates/keyvalues3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Repository](https://img.shields.io/badge/repository-GitHub-blue.svg)](https://github.com/TheCursedApple/KeyValues3)
+[![Workflow Status](https://img.shields.io/github/actions/workflow/status/TheCursedApple/KeyValues3/rust.yml)](https://github.com/TheCursedApple/KeyValues3/actions)
 
 A Rust library and CLI tool for parsing and manipulating Valve's KeyValues3 (KV3) format. KV3 is a data serialization format used in games like Dota 2, CS2, and Deadlock. This tool allows you to parse KV3 files, format them with proper indentation, and convert them to JSON.
 
