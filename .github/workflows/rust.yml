@@ -1,0 +1,126 @@
+name: Rust
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: build (${{ matrix.runs-on }})
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [macos-latest, ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.rustup/toolchains
+            target
+          key: ${{ matrix.runs-on }}-rust-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run tests
+        run: cargo test --test '*'
+
+      - name: Build macOS
+        if: matrix.runs-on == 'macos-latest'
+        run: |
+          rustup target add x86_64-apple-darwin aarch64-apple-darwin
+          cargo build --release --features json,binary --target x86_64-apple-darwin --target aarch64-apple-darwin
+
+      - name: Build linux
+        if: matrix.runs-on == 'ubuntu-latest'
+        run: |
+          sudo apt-get install --yes --no-install-recommends musl-tools
+          rustup target add x86_64-unknown-linux-musl aarch64-unknown-linux-musl
+          cargo build --release --features json,binary --target x86_64-unknown-linux-musl # --target aarch64-unknown-linux-musl
+
+      - name: Build Windows
+        if: matrix.runs-on == 'windows-latest'
+        run: |
+          rustup target add x86_64-pc-windows-msvc aarch64-pc-windows-msvc
+          cargo build --release --features json,binary --target x86_64-pc-windows-msvc --target aarch64-pc-windows-msvc
+
+      - name: Upload macOS artifacts
+        if: matrix.runs-on == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kv3-cli-macOS
+          path: target
+          if-no-files-found: error
+
+      - name: Upload linux artifacts
+        if: matrix.runs-on == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kv3-cli-linux
+          path: target
+          if-no-files-found: error
+
+      - name: Upload Windows artifacts
+        if: matrix.runs-on == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kv3-cli-windows
+          path: target
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Compress release
+        run: |
+          mkdir release
+
+          chmod +x artifacts/kv3-cli-macOS/x86_64-apple-darwin/release/kv3-cli
+          chmod +x artifacts/kv3-cli-macOS/aarch64-apple-darwin/release/kv3-cli
+          chmod +x artifacts/kv3-cli-linux/x86_64-unknown-linux-musl/release/kv3-cli
+          chmod +x artifacts/kv3-cli-windows/x86_64-pc-windows-msvc/release/kv3-cli.exe
+          chmod +x artifacts/kv3-cli-windows/aarch64-pc-windows-msvc/release/kv3-cli.exe
+
+          zip -9j release/kv3-cli-macOS-x86_64.zip artifacts/kv3-cli-macOS/x86_64-apple-darwin/release/kv3-cli
+          zip -9j release/kv3-cli-macOS-aarch64.zip artifacts/kv3-cli-macOS/aarch64-apple-darwin/release/kv3-cli
+          zip -9j release/kv3-cli-linux-x86_64.zip artifacts/kv3-cli-linux/x86_64-unknown-linux-musl/release/kv3-cli
+          zip -9j release/kv3-cli-windows-x86_64.zip artifacts/kv3-cli-windows/x86_64-pc-windows-msvc/release/kv3-cli.exe
+          zip -9j release/kv3-cli-windows-aarch64.zip artifacts/kv3-cli-windows/aarch64-pc-windows-msvc/release/kv3-cli.exe
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: release/*.zip
+
+  publish:
+    if: github.ref_type == 'tag'
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login into crates.io
+        run: cargo login ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: "Package for crates.io"
+        run: cargo package
+
+      - name: "Publish to crates.io"
+        run: cargo publish

@@ -1,0 +1,33 @@
+[package]
+name = "keyvalues3"
+version = "1.0.0"
+authors = ["Alex Grad <alex@grad.dev>"]
+edition = "2024"
+rust-version = "1.87"
+description = "A Rust library and CLI tool for parsing, formatting, and converting Valve's KeyValues3 (KV3) text format."
+repository = "https://github.com/TheCursedApple/KeyValues3"
+license = "MIT"
+keywords = ["keyvalues3", "kv3", "cli", "encoding", "parsing"]
+categories = ["command-line-utilities", "encoding", "parsing"]
+
+[lib]
+name = "kv3"
+path = "src/lib.rs"
+
+[[bin]]
+name = "kv3-cli"
+path = "src/bin.rs"
+required-features = ["binary", "json"]
+
+[dependencies]
+clap = { version = "4.5.40", features = ["derive"], optional = true }
+pest = "2.8.1"
+pest_derive = "2.8.1"
+serde_json = { version = "1.0.140", optional = true }
+
+[features]
+json = ["dep:serde_json"]
+binary = ["dep:clap"]
+
+[dev-dependencies]
+regex = "1.11.1"

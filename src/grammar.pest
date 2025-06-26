@@ -1,0 +1,40 @@
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+
+file = { SOI ~ root ~ EOI }
+
+root = _{ header? ~ (object | array) }
+
+header           =  { "<!--" ~ "kv3" ~ metadata+ ~ "-->" }
+metadata         = ${ metadata_key ~ ":" ~ metadata_value ~ ":" ~ "version" ~ "{" ~ metadata_version ~ "}" }
+metadata_key     = @{ (ASCII_ALPHANUMERIC | "_")+ }
+metadata_value   = @{ (ASCII_ALPHANUMERIC | "_")+ }
+metadata_version = @{ guid }
+guid             = @{ hex{8} ~ "-" ~ hex{4} ~ "-" ~ hex{4} ~ "-" ~ hex{4} ~ "-" ~ hex{12} }
+hex              = @{ ASCII_HEX_DIGIT }
+
+object      =  { "{" ~ object_pair* ~ "}" }
+object_pair =  { object_key ~ "=" ~ value }
+object_key  = _{ identifier | string }
+
+array = { "[" ~ (value ~ ","?)* ~ "]" }
+
+value = _{ object | array | flag | string | number | boolean | null }
+
+flag = { identifier ~ ":" ~ value }
+
+boolean = { "true" | "false" }
+
+null = { "null" }
+
+identifier = ${ (ASCII_ALPHANUMERIC | "_")+ }
+
+string           = ${ "\"" ~ string_value ~ "\"" }
+string_value     = @{ string_character* }
+string_character =  {
+    !("\"" | "\\") ~ ANY
+  | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+}
+
+number = @{
+    "-"? ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*) ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
+}
