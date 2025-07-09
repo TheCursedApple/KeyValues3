@@ -1,6 +1,6 @@
 [package]
 name = "keyvalues3"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Alex Grad <alex@grad.dev>"]
 edition = "2024"
 rust-version = "1.87"
@@ -23,7 +23,9 @@ required-features = ["binary", "json"]
 clap = { version = "4.5.40", features = ["derive"], optional = true }
 pest = "2.8.1"
 pest_derive = "2.8.1"
-serde_json = { version = "1.0.140", optional = true }
+serde_json = { version = "1.0.140", features = [
+    "preserve_order",
+], optional = true }
 
 [features]
 json = ["dep:serde_json"]
