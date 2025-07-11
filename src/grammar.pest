@@ -35,10 +35,10 @@ string_character =  {
   | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
 }
 
-multiline_string           = ${ "\"\"\"\n" ~ multiline_string_value ~ "\n\"\"\"" }
+multiline_string           = ${ "\"\"\"" ~ NEWLINE ~ multiline_string_value ~ NEWLINE ~ "\"\"\"" }
 multiline_string_value     = @{ multiline_string_character* }
 multiline_string_character =  {
-    !"\n\"\"\"" ~ ANY
+    !(NEWLINE ~ "\"\"\"") ~ ANY
 }
 
 number = @{
