@@ -9,6 +9,7 @@ pub enum Value {
     Array(Vec<Value>),
     Flag(String, Box<Value>),
     String(String),
+    MultilineString(String),
     Number(f64),
     Bool(bool),
     Null,
@@ -33,6 +34,10 @@ impl Value {
 
     pub fn is_string(&self) -> bool {
         matches!(self, Value::String(_))
+    }
+
+    pub fn is_multiline_string(&self) -> bool {
+        matches!(self, Value::MultilineString(_))
     }
 
     pub fn is_number(&self) -> bool {

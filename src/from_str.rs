@@ -71,6 +71,7 @@ pub fn from_str(str: &str) -> Result<Value, Error<Rule>> {
                 Value::Flag(key, Box::new(value))
             }
             Rule::string => Value::String(pair.into_inner().next().unwrap().as_str().to_owned()),
+            Rule::multiline_string => Value::MultilineString(pair.into_inner().next().unwrap().as_str().to_owned()),
             Rule::number => Value::Number(pair.as_str().parse().unwrap()),
             Rule::boolean => Value::Bool(pair.as_str().parse().unwrap()),
             Rule::null => Value::Null,

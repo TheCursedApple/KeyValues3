@@ -18,7 +18,7 @@ object_key  = _{ identifier | string }
 
 array = { "[" ~ (value ~ ","?)* ~ "]" }
 
-value = _{ object | array | flag | string | number | boolean | null }
+value = _{ object | array | flag | multiline_string | string | number | boolean | null }
 
 flag = { identifier ~ ":" ~ value }
 
@@ -33,6 +33,12 @@ string_value     = @{ string_character* }
 string_character =  {
     !("\"" | "\\") ~ ANY
   | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+}
+
+multiline_string           = ${ "\"\"\"\n" ~ multiline_string_value ~ "\n\"\"\"" }
+multiline_string_value     = @{ multiline_string_character* }
+multiline_string_character =  {
+    !"\n\"\"\"" ~ ANY
 }
 
 number = @{

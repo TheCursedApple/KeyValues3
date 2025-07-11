@@ -9,6 +9,7 @@ pub fn to_json(value: &Value) -> JsonValue {
         Value::Bool(b) => json!(b),
         Value::Number(n) => json!(n),
         Value::String(s) => json!(s),
+        Value::MultilineString(s) => json!(s),
         Value::Array(a) => json!(a.iter().map(to_json).collect::<Vec<_>>()),
         Value::Object(o) => {
             let mut map = Map::new();

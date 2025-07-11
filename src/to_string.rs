@@ -76,6 +76,7 @@ pub fn to_string(value: &Value) -> String {
             }
 
             Value::String(value) => format!("\"{}\"", value),
+            Value::MultilineString(value) => format!("\"\"\"\n{}\n\"\"\"\n", value),
             Value::Number(value) => value.to_string(),
             Value::Bool(value) => value.to_string(),
             Value::Null => "null".to_string(),
