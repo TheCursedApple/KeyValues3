@@ -5,26 +5,27 @@ fn test_from_str() {
     use kv3::{ObjectKey, Value};
 
     let str = r#"
-{
-    key_without_quotes = "value"
-    "key_with_quotes" = "value"
-    integer = 123
-    float = 123.45
-    bool_true = true
-    bool_false = false
-    null = null
-    array = [1, 2, 3]
-    object =
     {
-        key = "value"
+        key_without_quotes = "value"
+        "key_with_quotes" = "value"
+        integer = 123
+        float = 123.45
+        bool.true = true
+        bool.false = false
+        null = null
+        array = [1, 2, 3]
+        object =
+        {
+            key = "value"
+        }
+        // This is a comment
+        flag_resource = resource:"path/to/resource"
+        flag_subclass = subclass:
+        {
+            key = "value"
+        }
     }
-    flag_resource = resource:"path/to/resource"
-    flag_subclass = subclass:
-    {
-        key = "value"
-    }
-}
-"#;
+    "#;
     let value_1 = from_str(&str).unwrap();
 
     let value_2 = Value::Object(vec![
@@ -45,11 +46,11 @@ fn test_from_str() {
             Value::Number(123.45),
         ),
         (
-            ObjectKey::Identifier("bool_true".to_string()),
+            ObjectKey::Identifier("bool.true".to_string()),
             Value::Bool(true),
         ),
         (
-            ObjectKey::Identifier("bool_false".to_string()),
+            ObjectKey::Identifier("bool.false".to_string()),
             Value::Bool(false),
         ),
         (ObjectKey::Identifier("null".to_string()), Value::Null),
